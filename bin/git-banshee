@@ -1,0 +1,7 @@
+#!/usr/bin/env python2
+
+from gitbanshee.server import main
+from gitbanshee.utils import install_hooks
+
+install_hooks()
+main()

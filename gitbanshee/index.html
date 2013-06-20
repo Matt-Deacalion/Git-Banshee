@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="static/js/socket.io.js"></script>
+        <script src="static/js/howler.min.js"></script>
+        <script>
+            WEB_SOCKET_SWF_LOCATION = "/static/WebSocketMain.swf";
+            WEB_SOCKET_DEBUG = true;
+
+            var urlParams;
+            (window.onpopstate = function() {
+                var match,
+                pl     = /\+/g,
+                search = /([^&=]+)=?([^&]*)/g,
+                decode = function(s) { return decodeURIComponent(s.replace(pl, " ")); },
+                query  = window.location.search.substring(1);
+
+                urlParams = {};
+                while (match = search.exec(query))
+                urlParams[decode(match[1])] = decode(match[2]);
+            })();
+
+            var generate_hash = function(length) {
+                var chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
+                hash  = "";
+
+                if ("hash" in urlParams)
+                    return urlParams["hash"];
+
+                for (x=0; x<length; x++) {
+                    i = Math.floor(Math.random() * 62);
+                    hash += chars.charAt(i);
+                }
+
+                return hash;
+            };
+
+            var socket = io.connect(),
+                         namespace = generate_hash(20),
+                         action_sounds = {
+                            "commit": new Howl({ urls: ["/static/sounds/applause.mp3"] }),
+                            "merge":  new Howl({ urls: ["/static/sounds/mortal-kombat.mp3"] })
+                         };
+
+            socket.on(namespace, function(action) {
+                try {
+                    action_sounds[action].play();
+                } catch(e){
+                    // do nothing
+                }
+            });
+
+            socket.on('connect', function() {
+                console.log('Connected to the server');
+            });
+
+            socket.on('reconnect', function() {
+                console.log('Reconnected to the server');
+            });
+
+            socket.on('reconnecting', function() {
+                console.log('Attempting to re-connect to the server');
+            });
+
+            socket.on('error', function(e) {
+                console.log('Unknown error');
+            });
+        </script>
+    </head>
+    <body>
+        <!-- Todo: pretty page -->
+    </body>
+</html>
